@@ -110,7 +110,7 @@ const address = new Address(entity).toString()
         return bytes.length === DISPLAY_BYTE_LENGTH
     }
     
-This requires [bs58](https://www.npmjs.com/package/bs58) which can be installed adn configured as below
+This requires [bs58](https://www.npmjs.com/package/bs58) which can be installed and configured as below
 
 ```
 npm i --save bs58
