@@ -34,7 +34,7 @@ nvm use --lts
 git clone https://github.com/fetchai/javascript-api-demo
 npm install 
 ```
-## Run
+## RunNing the Demo
 
 ```
 npm run build
@@ -43,9 +43,7 @@ npm run start
 
 ## Requiring the fetchai-ledger-api NPM Module 
 
-- whilst in this demo the above `npm install` will handle the installation of the NPM Module the below command can be used 
-    one can install the module like so in your own projects
-
+- Whilst in this demo  `npm install` handles the installation of our NPM Module use the below command to install it in your own project
 ```
 npm install -i fetchai-ledger-api
 ``` 
@@ -53,7 +51,7 @@ npm install -i fetchai-ledger-api
 - One can  require the address class like so
 ```import {Address} from "fetchai-ledger-api";```
 
--However in this Demo we combine the imports of the four classes which we use in the below single statement
+- In this demo we import four classes as below
 ```
 import {Bootstrap, Entity, Address, LedgerApi} from "fetchai-ledger-api";
 ```
@@ -63,11 +61,11 @@ import {Bootstrap, Entity, Address, LedgerApi} from "fetchai-ledger-api";
 ### Overview
 
 - An account consist of an Address and a private key. An Address is a base-58 encoded string containing a public key and allows one to transfer Fet into an account and one to look-up the balance held by an account.
-- A private key allows for withdrawal of funds, and thus ought to be kept secret. 
-- The Entity class represents a public/private key pair and some basic operations pertaining to this such as key generation and generation of a 
+- A private key allows for withdrawal of funds, and must be kept secret. 
+- The Entity class represents a public/private key pair and provides for some basic operations pertaining to this such as key generation and the generation of a 
   an Address from a private key. 
   
-- The Address class by contrast contain only Addresses, the public component of an account, and is useful for validating Address formats, and converting between different formats.
+- The Address class wraps the public address, which it takes as a constructor, and is useful for validating and converting between Address formats.
  
 ### Code Explanation
  
@@ -101,14 +99,16 @@ const other = Entity.from_base64(base64_data)
 const address = new Address(entity).toString()
 ```
 
--One can validate the address is of the correct format by wrapping the "new Address" invocation
+- One can validate the address is of the correct format by wrapping the "new Address" invocation
  in a try/catch block, which will throw a ValidationError if the given address is invalid. Alternatively one can 
  use the below function
  
-    valid_address(display) {
+```
+valid_address(display) {
         const bytes = bs58.decode(display)
         return bytes.length === DISPLAY_BYTE_LENGTH
     }
+```
     
 This requires [bs58](https://www.npmjs.com/package/bs58) which can be installed and configured as below
 
@@ -122,10 +122,14 @@ browserify node_modules/bs58/index.js -o bs58.bundle.js --standalone bs58
 
 ### Overview
 
-Whilst anybody may run a node of the [Fetch Ledger](https://docs.fetch.ai/) there are some publicly available servers
-whose Addresses can be found using the Bootstrapping functionality. 
-The Host and Port values returned will by below code will then be used when querying the balance later in this example, 
-or for other actions related to the ledger such transferring funds or executing a smart contract. 
+Whilst anybody may run a node in the [Fetch Ledger](https://docs.fetch.ai/) there are some publicly available servers
+whose Addresses can be found using our Bootstrapping functionality. 
+
+Bootstrapping works by one passing in the name of a publicly 
+available server on the Fetch network and bootstrapping returns this Server's Host and Port. 
+
+The Host and Port of a server on the network is needed to perform 
+operations against the Ledger such as querying an account balance, transferring funds or submitting a smart contract to the Ledger.  
 
 - Importing the Bootstrapping Class
 ```
