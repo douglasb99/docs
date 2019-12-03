@@ -44,7 +44,7 @@ npm run start
 ## Requiring the fetchai-ledger-api NPM Module 
 
 - whilst in this demo the above `npm install` will handle the installation of the NPM Module the below command can be used 
-    one can install the module like so:
+    one can install the module like so in your own projects
 
 ```
 npm install -i fetchai-ledger-api
@@ -62,7 +62,7 @@ import {Bootstrap, Entity, Address, LedgerApi} from "fetchai-ledger-api";
 
 ### Overview
 
-- An account consist of an Address and a private key. An Address contains a public key and allows one to transfer Fet into an account and one to look-up the balance held by an account.
+- An account consist of an Address and a private key. An Address is a base-58 encoded string containing a public key and allows one to transfer Fet into an account and one to look-up the balance held by an account.
 - A private key allows for withdrawal of funds, and thus ought to be kept secret. 
 - The Entity class represents a public/private key pair and some basic operations pertaining to this such as key generation and generation of a 
   an Address from a private key. 
@@ -101,6 +101,23 @@ const other = Entity.from_base64(base64_data)
 const address = new Address(entity).toString()
 ```
 
+-One can validate the address is of the correct format by wrapping the "new Address" invocation
+ in a try/catch block, which will throw a ValidationError if the given address is invalid. Alternatively one can 
+ use the below function
+ 
+    valid_address(display) {
+        const bytes = bs58.decode(display)
+        return bytes.length === DISPLAY_BYTE_LENGTH
+    }
+    
+This requires [bs58](https://www.npmjs.com/package/bs58) which can be installed adn configured as below
+
+```
+npm i --save bs58
+npm install -g browserify
+browserify node_modules/bs58/index.js -o bs58.bundle.js --standalone bs58
+```
+
 ## Connecting to a Server (Bootstrapping)
 
 ### Overview
@@ -108,16 +125,24 @@ const address = new Address(entity).toString()
 Whilst anybody may run a node of the [Fetch Ledger](https://docs.fetch.ai/) there are some publicly available servers
 whose Addresses can be found using the Bootstrapping functionality. 
 The Host and Port values returned will by below code will then be used when querying the balance later in this example, 
-or for other actions related to the ledger such as making a transfer or submitting a smart contract. 
+or for other actions related to the ledger such transferring funds or executing a smart contract. 
 
-Requiring the Bootstrapping Class
+- Importing the Bootstrapping Class
 ```
-const Bootstrap = require('fetchai').Bootstrap
+import {Bootstrap} from "fetchai-ledger-api";
 ```
-One can pass in the name of a server ran by Fetch.ai such as 'devnet'.
+- One can pass in the name of a server ran by Fetch.ai such as 'devnet'.
 ```        
 const [host, port] = await Bootstrap.server_from_name("devnet")
 ```
+- In our React Demo we use the async/await syntax to handle the promise returned however one can use the then 
+  syntax.
+```  
+const promise = fetchai.Bootstrap.server_from_name('betanet')
+promise.then(function (result) {
+    console.log("Betanet is available as host" + result[0] + " and port " + result[1])
+})
+```  
 
 ## Querying the Balance of an Account
 
@@ -127,20 +152,23 @@ Balances are stored as integers in 10^-10 Fet, and can be queried by anybody wit
 
 ### Code Explanation
 
-- Require the LedgerApi class
+- Import the LedgerApi class
 ```
-const LedgerApi = require('fetchai').LedgerApi
+import {LedgerApi} from "fetchai-ledger-api";
 ```
-- Create a new Ledger Object with the host (URI) and port of an available server
+- Create a new Ledger Object with the host and port of an available server. 
+- One can also run the [Fetch Ledger](https://docs.fetch.ai/) locally during development and use the value "localhost" along with the port it is running on. 
 ```
  const api = new LedgerApi(host, port)
 ```
 - To Query the balance (returning an integer value equal to the quantity of Nano Fet held at the account) call the balance method with the public Address 
 ``` 
+      let balance = null;
         try {
-           const balance = await api.tokens.balance(data.address)
+            balance = await this.api.tokens.balance(this.state.public_key_display)
         } catch (e) {
-           // handle errors
+            // error handling logic in-case key is invalid, or network request fails.
+            this.setState({error_message: e.message});
         }
 ```
 
